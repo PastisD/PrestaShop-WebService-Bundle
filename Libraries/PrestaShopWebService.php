@@ -83,19 +83,21 @@ class PrestaShopWebService
 	 * Take the status code and throw an exception if the server didn't return 200 or 201 code
 	 * @param int $status_code Status code of an HTTP return
 	 */
-	protected function checkStatusCode($status_code)
+	protected function checkStatusCode($request)
 	{
 		$error_label = 'This call to PrestaShop Web Services failed and returned an HTTP status of %d. That means: %s.';
+		$status_code = $request['status_code'];
+		$request_json = json_encode($request);
 		switch($status_code)
 		{
 			case 200:	case 201:	break;
-			case 204: throw new PrestaShopWebServiceException(sprintf($error_label, $status_code, 'No content'));break;
-			case 400: throw new PrestaShopWebServiceException(sprintf($error_label, $status_code, 'Bad Request'));break;
-			case 401: throw new PrestaShopWebServiceException(sprintf($error_label, $status_code, 'Unauthorized'));break;
-			case 404: throw new PrestaShopWebServiceException(sprintf($error_label, $status_code, 'Not Found'));break;
-			case 405: throw new PrestaShopWebServiceException(sprintf($error_label, $status_code, 'Method Not Allowed'));break;
-			case 500: throw new PrestaShopWebServiceException(sprintf($error_label, $status_code, 'Internal Server Error'));break;
-			default: throw new PrestaShopWebServiceException('This call to PrestaShop Web Services returned an unexpected HTTP status of:' . $status_code);
+			case 204: throw new PrestaShopWebServiceException(sprintf($error_label, $status_code, 'No content : ' . $request_json));break;
+			case 400: throw new PrestaShopWebServiceException(sprintf($error_label, $status_code, 'Bad Request : ' . $request_json));break;
+			case 401: throw new PrestaShopWebServiceException(sprintf($error_label, $status_code, 'Unauthorized : ' . $request_json));break;
+			case 404: throw new PrestaShopWebServiceException(sprintf($error_label, $status_code, 'Not Found : ' . $request_json));break;
+			case 405: throw new PrestaShopWebServiceException(sprintf($error_label, $status_code, 'Method Not Allowed : ' . $request_json));break;
+			case 500: throw new PrestaShopWebServiceException(sprintf($error_label, $status_code, 'Internal Server Error : ' . $request_json));break;
+			default: throw new PrestaShopWebServiceException('This call to PrestaShop Web Services returned an unexpected HTTP status of:' . $status_code . ' : ' . $request_json);
 		}
 	}
 	/**
@@ -240,7 +242,7 @@ class PrestaShopWebService
 			throw new PrestaShopWebServiceException('Bad parameters given');
 		$request = self::executeRequest($url, array(CURLOPT_CUSTOMREQUEST => 'POST', CURLOPT_POSTFIELDS => $xml));
 
-		self::checkStatusCode($request['status_code']);
+		self::checkStatusCode($request);
 		return self::parseXML($request['response']);
 	}
 
@@ -296,7 +298,7 @@ class PrestaShopWebService
 		
 		$request = self::executeRequest($url, array(CURLOPT_CUSTOMREQUEST => 'GET'));
 		
-		self::checkStatusCode($request['status_code']);// check the response validity
+		self::checkStatusCode($request);// check the response validity
 		return self::parseXML($request['response']);
 	}
 
@@ -328,7 +330,7 @@ class PrestaShopWebService
 		else
 			throw new PrestaShopWebServiceException('Bad parameters given');
 		$request = self::executeRequest($url, array(CURLOPT_CUSTOMREQUEST => 'HEAD', CURLOPT_NOBODY => true));
-		self::checkStatusCode($request['status_code']);// check the response validity
+		self::checkStatusCode($request);// check the response validity
 		return $request['header'];
 	}
 	/**
@@ -358,7 +360,7 @@ class PrestaShopWebService
 			throw new PrestaShopWebServiceException('Bad parameters given');
 		
 		$request = self::executeRequest($url,  array(CURLOPT_CUSTOMREQUEST => 'PUT', CURLOPT_POSTFIELDS => $xml));
-		self::checkStatusCode($request['status_code']);// check the response validity
+		self::checkStatusCode($request);// check the response validity
 		return self::parseXML($request['response']);
 	}
 
@@ -399,7 +401,7 @@ class PrestaShopWebService
 		if (isset($options['id_group_shop']))
 			$url .= '&id_group_shop='.$options['id_group_shop'];
 		$request = self::executeRequest($url, array(CURLOPT_CUSTOMREQUEST => 'DELETE'));
-		self::checkStatusCode($request['status_code']);// check the response validity
+		self::checkStatusCode($request);// check the response validity
 		return true;
 	}
 	
